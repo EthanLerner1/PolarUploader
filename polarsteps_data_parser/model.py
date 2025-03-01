@@ -1,10 +1,12 @@
 from dataclasses import dataclass
 from datetime import datetime, date
 from pathlib import Path
-from typing import Self
+from typing import Self, List
 
 import jsonmaster
+from jsonmaster import open_json
 
+from polarsteps_data_parser import utils
 from polarsteps_data_parser.utils import parse_date, find_folder_by_id, list_files_in_folder
 
 
@@ -20,6 +22,17 @@ class Location:
     def from_json(cls, data: dict) -> Self:
         """Parse object from JSON data."""
         return Location(lat=data["lat"], lon=data["lon"], time=parse_date(data["time"]))
+
+    @staticmethod
+    def load_locations(input_dir: Path) -> List['Location']:
+        LOCATIONS_FILE: str = 'locations.json'
+
+        locations_path: Path = Path(input_dir, LOCATIONS_FILE)
+
+        with open_json(locations_path.__str__()) as jf:
+            locations_json: dict = jf.dict()
+
+        return [Location.from_json(x) for x in locations_json['locations']]
 
 
 @dataclass
